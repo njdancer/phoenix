@@ -220,34 +220,58 @@ This section outlines the high-level Epics and their User Stories for the MVP.
 
 **Epic 1: Foundational Setup & Initial Deployment Pipeline**
 
-- **Description:** Establish the core project structure, version control, basic Vite + React Router application shell (`phoenix-app`) capable of full-stack functionality, and a CI/CD pipeline capable of deploying this application as a Cloudflare Worker to the `dev.phoenix.dncr.me` environment.
-  - **Story 1.1: Initialize Project Repository & Nx Monorepo for a Full-Stack Capable Vite/React Router Application**
-    - As a Developer, I want a new Git repository initialized with an Nx Monorepo structure, configured to support a Vite + React Router application (e.g., `phoenix-app`) capable of full-stack functionality (UI serving and server-side logic via React Router handlers), deployable to Cloudflare Workers. The monorepo should also permit the future addition of distinct backend worker services if deemed necessary by the Architect.
-    - **Acceptance Criteria (ACs):**
-      1.  A new Git repository is created (e.g., on GitHub).
-      2.  The repository is initialized as an Nx Monorepo.
-      3.  The Nx Monorepo includes an application generated for a Vite + React Router frontend (e.g., `phoenix-app`), configured with the `@cloudflare/vite-plugin` (or equivalent) for Cloudflare Worker deployment and local development simulation.
-      4.  A `README.md` file is present with basic project information and setup instructions for the `phoenix-app`.
-      5.  Linting (ESLint) and formatting (Prettier) tools are configured and operational across the monorepo.
-  - **Story 1.2: Develop Minimal Vite + React Router Shell Application with Basic Server-Side Handler**
-    - As a Developer, I want a minimal `phoenix-app` (Vite + React Router) shell running within the Nx Monorepo, which includes a basic client-side route and a simple server-side request handler (e.g., for a health check or echo endpoint) leveraging React Router's server-side capabilities, so that I have a deployable full-stack-capable application target.
-    - **ACs:**
-      1.  The `phoenix-app` can be built successfully within the Nx Monorepo (e.g., `nx build phoenix-app`).
-      2.  The `phoenix-app` can be run locally (e.g., `nx serve phoenix-app`), with the Vite development server accurately simulating the Cloudflare Workers environment (including execution of server-side route logic).
-      3.  React Router is configured with at least one basic client-side route (e.g., `/`) displaying a simple placeholder page.
-      4.  A simple server-side handler is implemented within the `phoenix-app` structure (e.g., at `/api/health`) that returns a basic success response (e.g., JSON `{"status": "ok"}`).
-      5.  Tailwind CSS and shadcn/ui are integrated into the `phoenix-app`, and basic styling can be applied to the placeholder page.
-  - **Story 1.3: Configure Basic CI/CD Pipeline for Development Environment (Deploying `phoenix-app` to Worker)**
-    - As a Developer, I want a basic CI/CD pipeline (using GitHub Actions) configured for the `main` branch, so that code changes to `phoenix-app` are automatically built, linted, tested (with placeholder tests initially), and deployed as a Cloudflare Worker to the development environment.
-    - **ACs:**
-      1.  A GitHub Actions workflow is created that triggers on pushes to the `main` branch.
-      2.  The workflow checks out the code, sets up Node.js, and installs dependencies.
-      3.  The workflow runs linting checks for the `phoenix-app` and any other relevant parts of the monorepo; the pipeline fails if linting errors occur.
-      4.  The workflow runs the build command for `phoenix-app` (packaging it for Worker deployment); the pipeline fails if the build fails.
-      5.  (Placeholder for tests) The workflow includes a step for running tests (e.g., `nx test phoenix-app`); initially, these tests can be placeholder/passing tests. The pipeline fails if tests fail.
-      6.  If all previous steps pass, the `phoenix-app` (including its client-side assets and server-side logic) is deployed to a Cloudflare Worker service at `dev.phoenix.dncr.me`.
-      7.  The deployed `phoenix-app` shell (from Story 1.2) is accessible and functional via `dev.phoenix.dncr.me`, serving the client-side UI.
-      8.  The integrated server-side handler (e.g., `/api/health` from Story 1.2) in the deployed `phoenix-app` is accessible and returns the expected response.
+---
+
+**Setup Instructions & Commands (to be included in README or docs/setup.md, and referenced in Story 1.1)**
+
+To ensure a reproducible and modern setup, the following steps must be followed for initial project scaffolding and environment setup:
+
+**1. Prerequisites**
+
+- **Git** (already assumed installed)
+- **[mise](https://mise.jdx.dev/)** (for managing and pinning Node.js version)
+- **corepack** (bundled with Node.js LTS, for Yarn)
+
+**2. Install Node.js (Latest LTS) and Pin Version**
+
+```sh
+mise use node@lts
+mise install
+```
+
+This will ensure the project uses the latest Node.js LTS and pins it via `.tool-versions`.
+
+**3. Enable and Install Yarn via Corepack**
+
+```sh
+corepack enable
+yarn --version # (installs Yarn if not present)
+```
+
+**4. Generate Project Boilerplate**
+
+The project should be scaffolded using the official Cloudflare full-stack app generator, as referenced in the architecture document:
+
+```sh
+npm create cloudflare@latest
+# When prompted, select the full-stack app (Vite + React Router + SSR on Workers)
+# Name the app: phoenix-app (or as appropriate)
+# Choose TypeScript
+# Follow prompts for directory and setup
+```
+
+This command will generate the full-stack Vite + React Router application, preconfigured for Cloudflare Workers deployment, and will include the necessary project structure and configuration.
+
+**5. (Optional) Nx Monorepo Integration**
+If Nx monorepo structure is required for future extensibility (as per architecture), follow Nx's official documentation to integrate the generated app into an Nx workspace. (Document this step if/when performed.)
+
+---
+
+**Acceptance Criteria Update for Story 1.1:**
+
+- The repository includes a clearly documented list of required tools and step-by-step setup instructions, referencing the above commands and procedures, in the README or a dedicated setup guide.
+- The project is scaffolded using the official Cloudflare full-stack app generator (`npm create cloudflare@latest`), ensuring a modern, full-stack-ready baseline.
+- Node.js version is pinned using mise, and Yarn is managed via corepack.
 
 ---
 
@@ -453,66 +477,3 @@ To maintain focus and ensure a lean, achievable Minimum Viable Product, the foll
 | Version | Date       | Author                               | Description                            |
 | :------ | :--------- | :----------------------------------- | :------------------------------------- |
 | 1.0     | 2025-05-14 | PM-V3-BETA (with User collaboration) | Initial Product Requirements Document. |
-
----
-
-This concludes the PRD content. Next is the Initial Architect Prompt.
-
----
-
-## Initial Architect Prompt
-
-Based on our detailed discussions and the Product Requirements Document (PRD) for the **Phoenix** project, the following technical guidance and requirements have been established to kick off the Architecture Creation Mode. Your primary task is to design a robust, maintainable, and secure architecture that meets these MVP requirements, leveraging the Cloudflare ecosystem.
-
-### Technical Infrastructure & Stack
-
-- **Repository & Service Architecture Decision:**
-  - An **Nx Monorepo** is required.
-  - The primary application (`phoenix-app`) will be built using **Vite + React + React Router (in "framework mode" with data routers and the Vite plugin)**. This application must be capable of full-stack functionality, serving its own UI and handling server-side logic (e.g., API-like request handlers, data transformations) via React Router's capabilities.
-  - The `phoenix-app` will be deployed as a **Cloudflare Worker**.
-  - You (the Architect) are to determine if any specific backend logic (e.g., particularly intensive processing, or for clearer separation of concerns for future features) warrants the creation of distinct, separate Cloudflare Worker services within the monorepo, or if all MVP backend logic can be efficiently integrated within the server-side capabilities of the primary `phoenix-app` worker.
-- **Starter Project/Template Guidance:**
-  - The user has indicated that `yarn create cloudflare my-react-router-app --framework=react-router` (or equivalent `npx create-cloudflare@latest`) might provide a good bootstrap for the `phoenix-app`. Evaluate the output of this and determine the best way to integrate this pattern (Vite + React Router "framework mode" targeting Cloudflare Workers) within the Nx Monorepo structure.
-- **Hosting/Cloud Provider:** **Cloudflare**
-  - Compute: Cloudflare Workers (for `phoenix-app` serving UI and backend logic, and any additional distinct workers if designed).
-  - Storage:
-    - Cloudflare KV: For user configuration (e.g., selected Up Bank account for calculator), sync state, short-term caching (e.g., Up Bank balance).
-    - Cloudflare D1: Consider for more structured, queryable data if needed (e.g., persistent detailed event/audit logs for the dashboard, though simpler logging or KV might suffice for MVP). If D1 is used, there's a preference for **Drizzle ORM**.
-    - Cloudflare R2: Evaluate if needed for efficient storage and serving of larger static assets for the `phoenix-app` if they are not optimally bundled/served directly by the Worker/KV.
-  - Queues: Cloudflare Queues may be considered for resilient message handling if complex asynchronous processing is identified (e.g., for webhook processing if it becomes very involved, though direct processing in worker handlers might be sufficient for MVP).
-- **Frontend Platform:** Vite, React, React Router (framework mode with data routers, Vite plugin), Tailwind CSS v4, Shadcn/UI (CSS variables), Storybook v9 (beta target).
-- **Backend Platform:** Cloudflare Workers (Node.js runtime environment).
-- **Database Requirements:** See "Storage" under Hosting/Cloud Provider.
-
-### Technical Constraints
-
-- **Operational Costs:** Must aim to utilize free tiers of Cloudflare services and the chosen SMS provider (e.g., AWS SNS) as much as possible. Soft budget caps of $25 AUD/month per major service apply if costs are incurred (NFR6.1).
-- **Security:** High priority. Adherence to all security NFRs (NFR3.x) and Functional Requirements (FR3.x, FR7.x, FR8.x) regarding secret management, user authentication (SMS OTP & Passkey), and webhook security is paramount.
-- **Platform Lock-in:** Strong preference for the Cloudflare ecosystem for all core components.
-
-### Deployment Considerations
-
-- **CI/CD:** GitHub Actions.
-- **Environments:**
-  - Local development environment (simulating Cloudflare Workers via Vite plugin and/or `wrangler dev`).
-  - Development/Preview: `dev.phoenix.dncr.me` (automatically deployed from `main` branch; deployment conditional on all CI checks passing). The `main` branch will not have push protections to facilitate AI agent workflow.
-  - Production: `phoenix.dncr.me` (manually promoted from a validated `dev` environment state via CI/CD trigger).
-  - Ephemeral Preview Environments: For feature branches (e.g., `<branch-name>.dev.phoenix.dncr.me`).
-- **Quality Gates:** CI pipeline for `main` must include mandatory stages for linting, formatting, all automated tests (unit, integration), and successful build before deployment to `dev.phoenix.dncr.me`.
-
-### Local Development & Testing Requirements
-
-- **Framework:** Vitest for unit, integration, and potentially E2E tests (using browser mode for UI).
-- **Environment:** Nx Monorepo setup. Local development server (Vite with `@cloudflare/vite-plugin` or `wrangler dev`) must accurately simulate the Cloudflare Workers runtime.
-- **Testability:** Adherence to Testability NFRs (NFR9.x), including local test execution and considerations for simulating external dependencies/events.
-
-### Other Technical Considerations
-
-- **Maintainability:** Adherence to Maintainability NFRs (NFR4.x), including code quality standards, Nx conventions, modular design, Git commit standards, and automated checks.
-- **Integration Design:** Evaluate the pluggable adapter pattern for Up Bank and YNAB API integrations.
-- **Privacy:** Ensure all designs adhere to Privacy NFRs (NFR7.x), especially regarding data handling and any monitoring/analytics.
-- **Open Questions:** Review the "Open Questions / Assumptions to Validate" section of the PRD and incorporate investigation or resolution of these into your design where appropriate.
-- **Optional Features:** Assess the implementation complexity of FR8.4 (Dependabot Alerts) and FR8.5 (Secret Scanning Alerts) and advise on their feasibility for inclusion in the initial MVP build versus deferral.
-- **User Experience:** Ensure the architecture supports the "User Interaction and Design Goals" outlined in the PRD, including responsiveness and accessibility aspirations.
-
-Your deliverables will be an Architecture Design Document that outlines the proposed system architecture, technology choices (where not already specified), data models (if using D1), service interactions, and deployment strategy, addressing all functional and non-functional requirements from the PRD.
